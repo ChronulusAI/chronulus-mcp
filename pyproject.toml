@@ -1,43 +1,56 @@
 [project]
 name = "chronulus-mcp"
-version = "0.0.1"
-description = "Chronulus AI: A platform for the forecasting and prediction. Predict anything."
+version = "0.0.2"
+description = "An MCP Server for Chronulus AI Forecasting and Prediction Agents"
 readme = "README.md"
-requires-python = ">=3.10"
 authors = [
-    {name = "Chronulus AI", email = "jeremy@chronulus.com"},
+    { name = "Chronulus AI", email = "jeremy@chronulus.com" },
 ]
-[tool.setuptools]
-package-dir = {"" = "src"}
-packages = {find = {where = ["src"]}}
-include-package-data = false
-
+requires-python = ">=3.10"
+keywords = ["forecasting", "prediction", "timeseries", "mcp", "llm", "agents"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+]
 dependencies = [
-    "mcp>=1.2.1",
-    "chronulus>=0.0.9",
+    "mcp[cli]>=1.3.0",
+    "chronulus>=0.0.10",
+    "chronulus-core>=0.0.15",
+    "pandas",
+    "requests",
 ]
 
 [dependency-groups]
 dev = [
-    "mcp[cli]>=1.2.1",
+    "mcp[cli]>=1.3.0",
     "twine>=6.1.0",
 ]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+packages = { find = { where = ["src"] } }
+include-package-data = false
+
+[tool.setuptools.package-data]
+"chronulus_mcp" = ["_assets/react/*.jsx"]
 
 [tool.ruff]
 line-length = 150
 target-version = "py310"
 select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "I",  # isort
-    "B",  # flake8-bugbear
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "I", # isort
+    "B", # flake8-bugbear
 ]
 ignore = []
 
-
 [project.scripts]
-modal-mcp-toolbox = "chronulus_mcp:main"
+chronulus-mcp = "chronulus_mcp:main"
 
 [build-system]
 requires = ["hatchling"]
