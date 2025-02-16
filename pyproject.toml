@@ -1,0 +1,44 @@
+[project]
+name = "chronulus-mcp"
+version = "0.0.1"
+description = "Chronulus AI: A platform for the forecasting and prediction. Predict anything."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Chronulus AI", email = "jeremy@chronulus.com"},
+]
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = {find = {where = ["src"]}}
+include-package-data = false
+
+dependencies = [
+    "mcp>=1.2.1",
+    "chronulus>=0.0.9",
+]
+
+[dependency-groups]
+dev = [
+    "mcp[cli]>=1.2.1",
+    "twine>=6.1.0",
+]
+
+[tool.ruff]
+line-length = 150
+target-version = "py310"
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+]
+ignore = []
+
+
+[project.scripts]
+modal-mcp-toolbox = "chronulus_mcp:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
