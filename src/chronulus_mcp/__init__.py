@@ -105,21 +105,22 @@ How to use this tool:
 """
 
 SAVE_FORECAST_DESCRIPTION = """
-A tool that saves a rescaled Chronulus forecast to a CSV file using RescaledForecast's built-in pandas conversion
+A tool that saves a Chronulus forecast to separate CSV and TXT files
 
 When to use this tool:
-- Use this tool when you need to save a forecast to a CSV file for data analysis or integration with other tools
-- This tool combines rescaling with direct CSV export using RescaledForecast's native pandas support
-- The resulting CSV will preserve the forecast's time series structure and proper data types
-- Use when you need to share forecast results or analyze them in spreadsheet software
+- Use this tool when you need to save both the forecast data and its explanation to files
+- The forecast data will be saved as a CSV file for data analysis
+- The forecast explanation will be saved as a TXT file for reference
+- Both files will be saved in the same directory specified by output_path
 
 How to use this tool:
 - Provide the prediction_id from a previous forecast
-- Specify y_min and y_max for rescaling the predictions to the desired scale
+- Specify the output_path where both files should be saved
+- Provide csv_name for the forecast data file (must end in .csv)
+- Provide txt_name for the explanation file (must end in .txt)
+- Optionally provide y_min and y_max to rescale the predictions (defaults to 0)
 - Set invert_scale to True if the target units run in the opposite direction
-- Provide an output_path ending in .csv where the file should be saved
-- Optionally specify an index_col to set a specific column as the CSV index
-- The tool uses RescaledForecast's to_pandas() method to ensure proper data conversion
+- The tool will provide status updates through the MCP context
 """
 
 GET_RISK_ASSESSMENT_SCORECARD_DESCRIPTION = """
