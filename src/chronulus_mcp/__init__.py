@@ -11,6 +11,7 @@ from mcp.types import ImageContent
 from .assets import get_react_component
 from .estimator import create_chronulus_agent_and_get_forecast, reuse_chronulus_agent_and_get_forecast, rescale_predictions
 from .session import create_chronulus_session, get_risk_assessment_scorecard
+from .io import save_forecast
 
 SERVER_DESCRIPTION_V1 = "Chronulus MCP provides access to the Chronulus AI platform of forecasting and prediction agents."
 
@@ -103,6 +104,24 @@ How to use this tool:
 - If you would like to add additional notes about the scaled series, put these below the original prediction explanation. 
 """
 
+SAVE_FORECAST_DESCRIPTION = """
+A tool that saves a rescaled Chronulus forecast to a CSV file using RescaledForecast's built-in pandas conversion
+
+When to use this tool:
+- Use this tool when you need to save a forecast to a CSV file for data analysis or integration with other tools
+- This tool combines rescaling with direct CSV export using RescaledForecast's native pandas support
+- The resulting CSV will preserve the forecast's time series structure and proper data types
+- Use when you need to share forecast results or analyze them in spreadsheet software
+
+How to use this tool:
+- Provide the prediction_id from a previous forecast
+- Specify y_min and y_max for rescaling the predictions to the desired scale
+- Set invert_scale to True if the target units run in the opposite direction
+- Provide an output_path ending in .csv where the file should be saved
+- Optionally specify an index_col to set a specific column as the CSV index
+- The tool uses RescaledForecast's to_pandas() method to ensure proper data conversion
+"""
+
 GET_RISK_ASSESSMENT_SCORECARD_DESCRIPTION = """
 A tool that retrieves the risk assessment scorecard for the Chronulus Session in Markdown format
 
@@ -135,6 +154,7 @@ mcp.add_tool(create_chronulus_session, description=CREATE_SESSION_DESCRIPTION)
 mcp.add_tool(create_chronulus_agent_and_get_forecast, description=CREATE_AGENT_AND_GET_FORECAST_DESCRIPTION)
 mcp.add_tool(reuse_chronulus_agent_and_get_forecast, description=CREATE_AGENT_AND_GET_FORECAST_DESCRIPTION)
 mcp.add_tool(rescale_predictions, description=RESCALE_PREDICTIONS_DESCRIPTION)
+mcp.add_tool(save_forecast, description=SAVE_FORECAST_DESCRIPTION)
 mcp.add_tool(get_risk_assessment_scorecard, description=GET_RISK_ASSESSMENT_SCORECARD_DESCRIPTION)
 
 
