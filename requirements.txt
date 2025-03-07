@@ -1,4 +1,4 @@
-mcp[cli]>=1.3.0
+mcp[cli]==1.3.0
 chronulus>=0.0.10
 chronulus-core>=0.0.15
 requests
