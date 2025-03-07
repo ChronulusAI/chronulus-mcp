@@ -1,14 +1,24 @@
 import json
 from datetime import datetime
 from typing import Type, Annotated, List, Dict, Literal, Optional, Union
+
+from mcp.server.fastmcp import Context
 from pydantic import Field, BaseModel, create_model
 from chronulus import Session
 from chronulus.estimator import NormalizedForecaster
 from chronulus.prediction import RescaledForecast
+from chronulus_core.types.attribute import ImageFromFile
+
 
 class InputField(BaseModel):
     name: str = Field(description="Field name. Should be a valid python variable name.")
     description: str = Field(description="A description of the value you will pass in the field.")
+    type: Literal['str','ImageFromFile','List[ImageFromFile]']  = Field(
+        default='str',
+        description="""The type of the field. 
+        ImageFromFile takes a single named-argument, 'file_path' as input which should be absolute path to the image to be included. So you should provide this input as json, eg. {'file_path': '/path/to/image'}.
+        """
+    )
 
 
 class DataRow(BaseModel):
@@ -27,9 +37,15 @@ def generate_model_from_fields(model_name: str, fields: List[InputField]) -> Typ
     Returns:
         A new Pydantic BaseModel class with the specified fields
     """
+    literal_type_mapping = {
+        'str': str,
+        'ImageFromFile': ImageFromFile,
+        'List[ImageFromFile]': List[ImageFromFile]
+    }
+
     field_definitions = {
         field.name: (
-            Optional[str],
+            Optional[literal_type_mapping.get(field.type, str)],
             Field(description=field.description)
         )
         for field in fields
@@ -53,10 +69,11 @@ async def create_chronulus_agent_and_get_forecast(
         input_data_model: Annotated[List[InputField], Field(
             description="""Metadata on the fields you will include in the input_data."""
         )],
-        input_data: Annotated[Dict[str, str], Field(description="The forecast inputs that you will pass to the chronulus agent to make the prediction. The keys of the dict should correspond to the InputField name you provided in input_fields.")],
+        input_data: Annotated[Dict[str, Union[str, dict, List[dict]]], Field(description="The forecast inputs that you will pass to the chronulus agent to make the prediction. The keys of the dict should correspond to the InputField name you provided in input_fields.")],
         forecast_start_dt_str: Annotated[str, Field(description="The datetime str in '%Y-%m-%d %H:%M:%S' format of the first value in the forecast horizon.")],
         time_scale: Annotated[str, Field(description="The times scale of the forecast horizon. Valid time scales are 'hours', 'days', and 'weeks'.", default="days")],
         horizon_len: Annotated[int, Field(description="The integer length of the forecast horizon. Eg., 60 if a 60 day forecast was requested.", default=60)],
+        ctx: Context
 ) -> Union[str, Dict[str, Union[dict, str]]]:
     """Queues and retrieves a forecast from Chronulus with a predefined session_id
 
@@ -66,7 +83,7 @@ async def create_chronulus_agent_and_get_forecast(
     Args:
         session_id (str): The session_id for the forecasting or prediction use case.
         input_data_model (List[InputField]): Metadata on the fields you will include in the input_data. Eg., for a field named "brand", add a description like "the brand of the product to forecast"
-        input_data (Dict[str, str ]): The forecast inputs that you will pass to the chronulus agent to make the prediction. The keys of the dict should correspond to the InputField name you provided in input_fields.
+        input_data (Dict[str, Union[str, dict, List[dict]]]): The forecast inputs that you will pass to the chronulus agent to make the prediction. The keys of the dict should correspond to the InputField name you provided in input_fields.
         forecast_start_dt_str (str): The datetime str in '%Y-%m-%d %H:%M:%S' format of the first value in the forecast horizon."
         time_scale (str): The times scale of the forecast horizon. Valid time scales are 'hours', 'days', and 'weeks'.
         horizon_len (int): The integer length of the forecast horizon. Eg., 60 if a 60 day forecast was requested.
@@ -78,18 +95,24 @@ async def create_chronulus_agent_and_get_forecast(
 
     try:
         chronulus_session = Session.load_from_saved_session(session_id=session_id, verbose=False)
-    except:
-        return "session retrieval"
+    except Exception as e:
+        error_message = f"Failed to retrieve session with session_id: {session_id}\n\n{e}"
+        _ = await ctx.error( message=error_message)
+        return error_message
 
     try:
         InputItem = generate_model_from_fields("InputItem", input_data_model)
-    except:
-        return "input item type"
+    except Exception as e:
+        error_message = f"Failed to create InputItem model with input data model: {json.dumps(input_data_model, indent=2)}\n\n{e}"
+        _ = await ctx.error(message=error_message)
+        return error_message
 
     try:
         item = InputItem(**input_data)
-    except:
-        return "input item parse"
+    except Exception as e:
+        error_message = f"Failed to validate the input_data with the generated InputItem model. \n\n{e}"
+        _ = await ctx.error(message=error_message)
+        return error_message
 
     try:
         nf_agent = NormalizedForecaster(
@@ -97,7 +120,6 @@ async def create_chronulus_agent_and_get_forecast(
             input_type=InputItem,
             verbose=False,
         )
-
     except Exception as e:
         return f"""Error at nf_agent: {str(e)}
         
@@ -133,7 +155,7 @@ input_type = {str(type(InputItem))}
 
 async def reuse_chronulus_agent_and_get_forecast(
         agent_id: Annotated[str, Field(description="The agent_id for the forecasting or prediction use case and previously defined input_data_model")],
-        input_data: Annotated[Dict[str, str], Field(
+        input_data: Annotated[Dict[str, Union[str, dict, List[dict]]], Field(
             description="The forecast inputs that you will pass to the chronulus agent to make the prediction. The keys of the dict should correspond to the InputField name you provided in input_fields.")],
         forecast_start_dt_str: Annotated[str, Field(
             description="The datetime str in '%Y-%m-%d %H:%M:%S' format of the first value in the forecast horizon.")],
@@ -151,7 +173,7 @@ async def reuse_chronulus_agent_and_get_forecast(
 
     Args:
         agent_id (str): The agent_id for the forecasting or prediction use case and previously defined input_data_model
-        input_data (Dict[str, str ]): The forecast inputs that you will pass to the chronulus agent to make the prediction. The keys of the dict should correspond to the InputField name you provided in input_fields.
+        input_data (Dict[str, Union[str, dict, List[dict]]]): The forecast inputs that you will pass to the chronulus agent to make the prediction. The keys of the dict should correspond to the InputField name you provided in input_fields.
         forecast_start_dt_str (str): The datetime str in '%Y-%m-%d %H:%M:%S' format of the first value in the forecast horizon."
         time_scale (str): The times scale of the forecast horizon. Valid time scales are 'hours', 'days', and 'weeks'.
         horizon_len (int): The integer length of the forecast horizon. Eg., 60 if a 60 day forecast was requested.
@@ -192,7 +214,7 @@ async def rescale_predictions(
     y_max: Annotated[float, Field(description="The expected largest value for the use case. E.g., for product sales, 0 would be the largest possible value would be given by the user or determined from this history of sales for the product in question or a similar product.")],
     invert_scale: Annotated[bool, Field(description="Set this flag to true if the scale of the new units will run in the opposite direction from the inputs.", default=False)],
 ) -> List[dict]:
-    """Rescales a prediction data from the NormalizedForecaster agent
+    """Rescales prediction data from the NormalizedForecaster agent
 
     Args:
         prediction_id (str) : The prediction_id for the prediction you would like to rescale as returned by the forecasting agent
