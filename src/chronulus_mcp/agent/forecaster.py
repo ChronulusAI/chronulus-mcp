@@ -1,58 +1,16 @@
 import json
 from datetime import datetime
-from typing import Type, Annotated, List, Dict, Literal, Optional, Union
+from typing import Annotated, List, Dict, Union
 
 from mcp.server.fastmcp import Context
-from pydantic import Field, BaseModel, create_model
+from pydantic import Field
 
-from chronulus_mcp.types import InputField, DataRow
+from ._types import InputField, DataRow, generate_model_from_fields
 
 from chronulus import Session
 from chronulus.estimator import NormalizedForecaster
 from chronulus.prediction import RescaledForecast
-from chronulus_core.types.attribute import ImageFromFile, TextFromFile, Text, PdfFromFile
 
-
-def generate_model_from_fields(model_name: str, fields: List[InputField]) -> Type[BaseModel]:
-    """
-    Generate a new Pydantic BaseModel from a list of InputField objects.
-
-    Args:
-        model_name: The name for the generated model class
-        fields: List of InputField objects defining the model's fields
-
-    Returns:
-        A new Pydantic BaseModel class with the specified fields
-    """
-    literal_type_mapping = {
-        'str': str,
-        'ImageFromFile': ImageFromFile,
-        'List[ImageFromFile]': List[ImageFromFile],
-        'TextFromFile': TextFromFile,
-        'List[TextFromFile]': List[TextFromFile],
-        'PdfFromFile': PdfFromFile,
-        'List[PdfFromFile]': List[PdfFromFile]
-    }
-
-    field_definitions = {
-        field.name: (
-            Optional[literal_type_mapping.get(field.type, str)],
-            Field(description=field.description)
-        )
-        for field in fields
-    }
-
-    DynamicModel = create_model(
-        model_name,
-        __base__=BaseModel,  # Explicitly set BaseModel as the base class
-        **field_definitions
-    )
-
-    DynamicModel.__annotations__ = {
-        field.name: str for field in fields
-    }
-
-    return DynamicModel
 
 
 async def create_forecasting_agent_and_get_forecast(
