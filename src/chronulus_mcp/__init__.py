@@ -20,6 +20,8 @@ choronulus-agents server provides access to the Chronulus AI platform of forecas
 
 - Sessions capture an overall use case that is described by a situation and task.
 - Agents created for a given session and are reusable across multiple different forecasting inputs.
+- Input features can include text or files including images, text, or pdf (provide the path to the file)
+- The total size of all inputs cannot exceed 10MB. So plan according when choosing inputs
 
 For example, in a retail forecasting workflow, 
     - The situation might include information about the business, location, demographics of customers, and motivation for forecasting
@@ -60,11 +62,21 @@ When to use this tool:
 
 How to use this tool:
 - First, make sure you have a session_id for the forecasting or prediction use case.
-- Next, think about the features / characteristics most suitable for producing the requested forecast
-    and then create an input_data_model that corresponds to the input_data you will provide for the thing being forecasted.
- - Finally, add information about the forecasting horizon and time scale requested by the user
- - Assume the dates and datetimes in the prediction results are already converted to the appropriate local timezone if location is a factor in the use case. So do not try to convert from UTC to local time when plotting.
- - When plotting the predictions, use a Rechart time series with the appropriate axes labeled and with the prediction explanation displayed as a caption below the plot
+- Next, think about the features / characteristics most suitable for producing the requested forecast and then 
+create an input_data_model that corresponds to the input_data you will provide for the thing being forecasted.
+- Remember to pass all relevant information to Chronulus including text and images provided by the user. 
+- If a user gives you files about a thing you are forecasting, you should pass these as inputs to the agent using 
+one of the following types: 
+    - ImageFromFile
+    - List[ImageFromFile]
+    - TextFromFile
+    - List[TextFromFile]
+    - PdfFromFile
+    - List[PdfFromFile]
+- If you have a large amount of text (over 100 words) to pass to the agent, you should use the Text or List[Text] field types
+- Finally, add information about the forecasting horizon and time scale requested by the user
+- Assume the dates and datetimes in the prediction results are already converted to the appropriate local timezone if location is a factor in the use case. So do not try to convert from UTC to local time when plotting.
+- When plotting the predictions, use a Rechart time series with the appropriate axes labeled and with the prediction explanation displayed as a caption below the plot
 """
 
 REUSE_AGENT_AND_GET_FORECAST_DESCRIPTION = """
@@ -80,9 +92,18 @@ How to use this tool:
 - First, make sure you have an agent_id for the agent. The agent is already attached to the correct session. So you do not need to provide a session_id.
 - Next, reference the input data model that you previously used with the agent and create new inputs for the item being forecast
     that align with the previously specified input data model
- - Finally, add information about the forecasting horizon and time scale requested by the user
- - Assume the dates and datetimes in the prediction results are already converted to the appropriate local timezone if location is a factor in the use case. So do not try to convert from UTC to local time when plotting.
- - When plotting the predictions, use a Rechart time series with the appropriate axes labeled and with the prediction explanation displayed as a caption below the plot
+- Remember to pass all relevant information to Chronulus including text and images provided by the user. 
+- If a user gives you files about a thing you are forecasting, you should pass these as inputs to the agent using  
+    - ImageFromFile
+    - List[ImageFromFile]
+    - TextFromFile
+    - List[TextFromFile]
+    - PdfFromFile
+    - List[PdfFromFile]
+- If you have a large amount of text (over 100 words) to pass to the agent, you should use the Text or List[Text] field types
+- Finally, add information about the forecasting horizon and time scale requested by the user
+- Assume the dates and datetimes in the prediction results are already converted to the appropriate local timezone if location is a factor in the use case. So do not try to convert from UTC to local time when plotting.
+- When plotting the predictions, use a Rechart time series with the appropriate axes labeled and with the prediction explanation displayed as a caption below the plot
 """
 
 RESCALE_PREDICTIONS_DESCRIPTION = """
@@ -112,6 +133,7 @@ When to use this tool:
 - The forecast data will be saved as a CSV file for data analysis
 - The forecast explanation will be saved as a TXT file for reference
 - Both files will be saved in the same directory specified by output_path
+- This tool can also be used to directly save rescaled predictions without first calling the rescaling tool
 
 How to use this tool:
 - Provide the prediction_id from a previous forecast

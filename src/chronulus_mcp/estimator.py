@@ -7,13 +7,13 @@ from pydantic import Field, BaseModel, create_model
 from chronulus import Session
 from chronulus.estimator import NormalizedForecaster
 from chronulus.prediction import RescaledForecast
-from chronulus_core.types.attribute import ImageFromFile
+from chronulus_core.types.attribute import ImageFromFile, TextFromFile, Text, PdfFromFile
 
 
 class InputField(BaseModel):
     name: str = Field(description="Field name. Should be a valid python variable name.")
     description: str = Field(description="A description of the value you will pass in the field.")
-    type: Literal['str','ImageFromFile','List[ImageFromFile]']  = Field(
+    type: Literal['str','Text','List[Text]','TextFromFile','List[TextFromFile]','PdfFromFile','List[PdfFromFile]' ,'ImageFromFile','List[ImageFromFile]']  = Field(
         default='str',
         description="""The type of the field. 
         ImageFromFile takes a single named-argument, 'file_path' as input which should be absolute path to the image to be included. So you should provide this input as json, eg. {'file_path': '/path/to/image'}.
@@ -40,7 +40,11 @@ def generate_model_from_fields(model_name: str, fields: List[InputField]) -> Typ
     literal_type_mapping = {
         'str': str,
         'ImageFromFile': ImageFromFile,
-        'List[ImageFromFile]': List[ImageFromFile]
+        'List[ImageFromFile]': List[ImageFromFile],
+        'TextFromFile': TextFromFile,
+        'List[TextFromFile]': List[TextFromFile],
+        'PdfFromFile': PdfFromFile,
+        'List[PdfFromFile]': List[PdfFromFile]
     }
 
     field_definitions = {
@@ -71,9 +75,9 @@ async def create_chronulus_agent_and_get_forecast(
         )],
         input_data: Annotated[Dict[str, Union[str, dict, List[dict]]], Field(description="The forecast inputs that you will pass to the chronulus agent to make the prediction. The keys of the dict should correspond to the InputField name you provided in input_fields.")],
         forecast_start_dt_str: Annotated[str, Field(description="The datetime str in '%Y-%m-%d %H:%M:%S' format of the first value in the forecast horizon.")],
+        ctx: Context,
         time_scale: Annotated[str, Field(description="The times scale of the forecast horizon. Valid time scales are 'hours', 'days', and 'weeks'.", default="days")],
         horizon_len: Annotated[int, Field(description="The integer length of the forecast horizon. Eg., 60 if a 60 day forecast was requested.", default=60)],
-        ctx: Context
 ) -> Union[str, Dict[str, Union[dict, str]]]:
     """Queues and retrieves a forecast from Chronulus with a predefined session_id
 
@@ -85,6 +89,7 @@ async def create_chronulus_agent_and_get_forecast(
         input_data_model (List[InputField]): Metadata on the fields you will include in the input_data. Eg., for a field named "brand", add a description like "the brand of the product to forecast"
         input_data (Dict[str, Union[str, dict, List[dict]]]): The forecast inputs that you will pass to the chronulus agent to make the prediction. The keys of the dict should correspond to the InputField name you provided in input_fields.
         forecast_start_dt_str (str): The datetime str in '%Y-%m-%d %H:%M:%S' format of the first value in the forecast horizon."
+        ctx (Context): Context object providing access to MCP capabilities.
         time_scale (str): The times scale of the forecast horizon. Valid time scales are 'hours', 'days', and 'weeks'.
         horizon_len (int): The integer length of the forecast horizon. Eg., 60 if a 60 day forecast was requested.
 

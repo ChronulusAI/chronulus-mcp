@@ -13,10 +13,10 @@ async def save_forecast(
     output_path: Annotated[str, Field(description="The path where the CSV file should be saved. Should end in .csv")],
     csv_name: Annotated[str, Field(description="The path where the CSV file should be saved. Should end in .csv")],
     txt_name: Annotated[str, Field(description="The name of the TXT file to be saved. Should end in .txt")],
-    y_min: Annotated[float, Field(default=0, description="The expected smallest value for the use case. E.g., for product sales, 0 would be the least possible value for sales.")],
-    y_max: Annotated[float, Field(default=0, description="The expected largest value for the use case. E.g., for product sales, 0 would be the largest possible value would be given by the user or determined from this history of sales for the product in question or a similar product.")],
+    ctx: Context,
+    y_min: Annotated[float, Field(default=0.0, description="The expected smallest value for the use case. E.g., for product sales, 0 would be the least possible value for sales.")],
+    y_max: Annotated[float, Field(default=1.0, description="The expected largest value for the use case. E.g., for product sales, 0 would be the largest possible value would be given by the user or determined from this history of sales for the product in question or a similar product.")],
     invert_scale: Annotated[bool, Field(default=False, description="Set this flag to true if the scale of the new units will run in the opposite direction from the inputs.")],
-    ctx: Annotated[Context, Field(description="Context object providing access to MCP capabilities.")],
 ) -> str:
     """Saves the forecast from a NormalizedForecaster agent to CSV and the explanation to TXT
 
@@ -47,7 +47,7 @@ async def save_forecast(
     df = rescaled_forecast.to_pandas()
 
     # Save to CSV
-    df.to_csv(os.path.join(output_path, csv_name), index=False)
+    df.to_csv(os.path.join(output_path, csv_name), index_label="ds")
 
     with open(os.path.join(output_path, txt_name), "w") as f:
         f.write(normalized_forecast.text)
