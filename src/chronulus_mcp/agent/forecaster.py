@@ -4,26 +4,13 @@ from typing import Type, Annotated, List, Dict, Literal, Optional, Union
 
 from mcp.server.fastmcp import Context
 from pydantic import Field, BaseModel, create_model
+
+from chronulus_mcp.types import InputField, DataRow
+
 from chronulus import Session
 from chronulus.estimator import NormalizedForecaster
 from chronulus.prediction import RescaledForecast
 from chronulus_core.types.attribute import ImageFromFile, TextFromFile, Text, PdfFromFile
-
-
-class InputField(BaseModel):
-    name: str = Field(description="Field name. Should be a valid python variable name.")
-    description: str = Field(description="A description of the value you will pass in the field.")
-    type: Literal['str','Text','List[Text]','TextFromFile','List[TextFromFile]','PdfFromFile','List[PdfFromFile]' ,'ImageFromFile','List[ImageFromFile]']  = Field(
-        default='str',
-        description="""The type of the field. 
-        ImageFromFile takes a single named-argument, 'file_path' as input which should be absolute path to the image to be included. So you should provide this input as json, eg. {'file_path': '/path/to/image'}.
-        """
-    )
-
-
-class DataRow(BaseModel):
-    dt: str = Field(description="The value of the date or datetime field")
-    y_hat: float = Field(description="The value of the y_hat field")
 
 
 def generate_model_from_fields(model_name: str, fields: List[InputField]) -> Type[BaseModel]:
@@ -68,7 +55,7 @@ def generate_model_from_fields(model_name: str, fields: List[InputField]) -> Typ
     return DynamicModel
 
 
-async def create_chronulus_agent_and_get_forecast(
+async def create_forecasting_agent_and_get_forecast(
         session_id: Annotated[str, Field(description="The session_id for the forecasting or prediction use case")],
         input_data_model: Annotated[List[InputField], Field(
             description="""Metadata on the fields you will include in the input_data."""
@@ -158,7 +145,7 @@ input_type = {str(type(InputItem))}
         return f"""Error on prediction: {str(e)}"""
 
 
-async def reuse_chronulus_agent_and_get_forecast(
+async def reuse_forecasting_agent_and_get_forecast(
         agent_id: Annotated[str, Field(description="The agent_id for the forecasting or prediction use case and previously defined input_data_model")],
         input_data: Annotated[Dict[str, Union[str, dict, List[dict]]], Field(
             description="The forecast inputs that you will pass to the chronulus agent to make the prediction. The keys of the dict should correspond to the InputField name you provided in input_fields.")],
@@ -213,7 +200,7 @@ async def reuse_chronulus_agent_and_get_forecast(
         return f"""Error on prediction: {str(e)}"""
 
 
-async def rescale_predictions(
+async def rescale_forecast(
     prediction_id: Annotated[str, Field(description="The prediction_id from a prediction result")],
     y_min: Annotated[float, Field(description="The expected smallest value for the use case. E.g., for product sales, 0 would be the least possible value for sales.")],
     y_max: Annotated[float, Field(description="The expected largest value for the use case. E.g., for product sales, 0 would be the largest possible value would be given by the user or determined from this history of sales for the product in question or a similar product.")],

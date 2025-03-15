@@ -1,15 +1,9 @@
 import argparse
-import logging
-from typing import Any, Dict, Optional, Annotated, List
-
-
-from pydantic import BaseModel, Field
 
 from mcp.server.fastmcp import FastMCP
-from mcp.types import ImageContent
 
 from .assets import get_react_component
-from .estimator import create_chronulus_agent_and_get_forecast, reuse_chronulus_agent_and_get_forecast, rescale_predictions
+from chronulus_mcp.agent.forecaster import create_forecasting_agent_and_get_forecast, reuse_forecasting_agent_and_get_forecast, rescale_forecast
 from .session import create_chronulus_session, get_risk_assessment_scorecard
 from .io import save_forecast
 
@@ -174,9 +168,9 @@ How to use this resource:
 
 
 mcp.add_tool(create_chronulus_session, description=CREATE_SESSION_DESCRIPTION)
-mcp.add_tool(create_chronulus_agent_and_get_forecast, description=CREATE_AGENT_AND_GET_FORECAST_DESCRIPTION)
-mcp.add_tool(reuse_chronulus_agent_and_get_forecast, description=CREATE_AGENT_AND_GET_FORECAST_DESCRIPTION)
-mcp.add_tool(rescale_predictions, description=RESCALE_PREDICTIONS_DESCRIPTION)
+mcp.add_tool(create_forecasting_agent_and_get_forecast, description=CREATE_AGENT_AND_GET_FORECAST_DESCRIPTION)
+mcp.add_tool(reuse_forecasting_agent_and_get_forecast, description=CREATE_AGENT_AND_GET_FORECAST_DESCRIPTION)
+mcp.add_tool(rescale_forecast, description=RESCALE_PREDICTIONS_DESCRIPTION)
 mcp.add_tool(save_forecast, description=SAVE_FORECAST_DESCRIPTION)
 mcp.add_tool(get_risk_assessment_scorecard, description=GET_RISK_ASSESSMENT_SCORECARD_DESCRIPTION)
 
