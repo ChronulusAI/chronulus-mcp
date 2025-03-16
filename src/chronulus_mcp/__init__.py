@@ -6,7 +6,7 @@ from .assets import get_react_component
 from chronulus_mcp.agent.forecaster import create_forecasting_agent_and_get_forecast, reuse_forecasting_agent_and_get_forecast, rescale_forecast
 from chronulus_mcp.agent.predictor import create_prediction_agent_and_get_predictions, reuse_prediction_agent_and_get_prediction
 from .session import create_chronulus_session, get_risk_assessment_scorecard
-from .io import save_forecast
+from .io import save_forecast, save_prediction_analysis_html
 
 SERVER_DESCRIPTION_V1 = "Chronulus MCP provides access to the Chronulus AI platform of forecasting and prediction agents."
 
@@ -130,7 +130,7 @@ How to use this tool:
 """
 
 SAVE_FORECAST_DESCRIPTION = """
-A tool that saves a Chronulus forecast to separate CSV and TXT files
+A tool that saves a Chronulus forecast from NormalizedForecaster to separate CSV and TXT files
 
 When to use this tool:
 - Use this tool when you need to save both the forecast data and its explanation to files
@@ -214,10 +214,26 @@ being predicted that aligns with the previously specified input data model
 experts is sufficient. 
 """
 
+SAVE_ANALYSIS_HTML_DESCRIPTION = """
+A tool that saves an analysis of a BinaryPredictor prediction to HTML. 
+
+The analysis includes a plot of the theoretical and empirical beta distribution estimated by Chronulus and also
+list the opinions provided by each expert.
+
+When to use this tool:
+- Use this tool when you need to save the BinaryPredictor estimates to for the user
+
+How to use this tool:
+- Provide the request_id from a previous prediction response
+- Specify the output_path where the html should be saved
+- Provide html_name for the file (must end in .html)
+- The tool will provide status updates through the MCP context
+"""
+
 # prediction agent
 mcp.add_tool(create_prediction_agent_and_get_predictions, description=CREATE_AGENT_AND_GET_PREDICTION_DESCRIPTION)
 mcp.add_tool(reuse_prediction_agent_and_get_prediction, description=REUSE_AGENT_AND_GET_PREDICTION_DESCRIPTION)
-
+mcp.add_tool(save_prediction_analysis_html, description=SAVE_ANALYSIS_HTML_DESCRIPTION)
 
 ##############################################################################
 #   Extras

@@ -80,9 +80,10 @@ input_type = {str(type(InputItem))}
         return f"""Error at nf_agent: {str(e)}"""
 
     try:
-        prediction_set = agent.get_predictions(req.request_id)
+        prediction_set = agent.get_request_predictions(req.request_id)
         return {
             "agent_id": agent.estimator_id,
+            "request_id": req.request_id,
             "beta_params": prediction_set.beta_params,
             'expert_opinions': [p.text for p in prediction_set],
             'probability': prediction_set.prob_a}
@@ -121,9 +122,10 @@ async def reuse_prediction_agent_and_get_prediction(
         return f"""Error at nf_agent: {str(e)}"""
 
     try:
-        prediction_set = agent.get_predictions(req.request_id)
+        prediction_set = agent.get_request_predictions(req.request_id)
         return {
             "agent_id": agent.estimator_id,
+            "request_id": req.request_id,
             "beta_params": prediction_set.beta_params,
             'expert_opinions': [p.text for p in prediction_set],
             'probability': prediction_set.prob_a}
