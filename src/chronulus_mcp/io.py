@@ -103,9 +103,6 @@ async def save_prediction_analysis_html(
     mode = (a - 1) / (a + b - 2)
     mode_txt = f"{mode: 16.4f}" if not divergent else 'Diverges'
 
-
-
-
     html = html.replace("[TITLE_OF_ANALYSIS]", title)
     html = html.replace("[PLOT_LABEL]", plot_label)
     html = html.replace("[CHRONULUS_PREDICTION_SUMMARY]", chronulus_prediction_summary)

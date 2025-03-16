@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>[TITLE_OF_ANALYSIS]</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js" integrity="sha512-UK8MjH09aePxFAd8OwI5P4oP462OBBNGVh3OtnuHjybd0T3ArUbAseIuHpS1XfinmMXcCZG5barC+7SNPjuQtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -215,12 +216,12 @@
     <div class="controls">
       <div class="control-group">
         <label for="alpha">Alpha (α):</label>
-        <input type="number" id="alpha" min="0.1" step="0.1" value="[ALPHA]">
+        <input type="number" id="alpha" min="0.1" step="0.1" value="1.1">
       </div>
       
       <div class="control-group">
         <label for="beta">Beta (β):</label>
-        <input type="number" id="beta" min="0.1" step="0.1" value="[BETA]">
+        <input type="number" id="beta" min="0.1" step="0.1" value="1.1">
       </div>
       
       <div class="control-group">
@@ -252,14 +253,20 @@
     </div>
     
     <div class="stats-container">
+
+      <div class="summary-box">
+        <h2>Chronulus Prediction Summary</h2>
+        <div>[CHRONULUS_PREDICTION_SUMMARY]</div>
+      </div>
+
       <div class="stats-box">
         <h2>Theoretical Properties</h2>
         <ul>
-          <li>Parameters: α = <span id="alphaValue">[ALPHA]</span>, β = <span id="betaValue">[BETA]</span></li>
-          <li>Mean = <span id="meanValue">[MEAN]</span></li>
-          <li>Standard Deviation = <span id="stdDevValue">[STDEV]</span></li>
-          <li>Variance = <span id="varianceValue">[VARIANCE]</span></li>
-          <li>Mode = <span id="modeValue">[MODE]</span></li>
+          <li>Parameters: α = <span id="alphaValue"></span>, β = <span id="betaValue"></span></li>
+          <li>Mean = <span id="meanValue"></span></li>
+          <li>Standard Deviation = <span id="stdDevValue"></span></li>
+          <li>Variance = <span id="varianceValue"></span></li>
+          <li>Mode = <span id="modeValue"></span></li>
         </ul>
         
         <div class="sample-stats">
@@ -277,26 +284,36 @@
           </ul>
         </div>
       </div>
+
+
       
       <div class="stats-box">
+
         <h2>Confidence Intervals</h2>
         <ul>
-          <li>95% Confidence Interval: [<span id="lowerBoundValue">0.3742</span>, <span id="upperBoundValue">0.8682</span>]</li>
-          <li>Consensus Prediction: <span id="consensusValue">63.78</span>%</li>
+          <li>Consensus Prediction: <span id="consensusValue">[MEAN]</span>%</li>
+          <li>
+            Confidence Intervals:
+            <ul>
+            <li>95% : [<span id="lowerBound95Value">0.0</span>, <span id="upperBound95Value">1.0</span>]</li>
+            <li>90% : [<span id="lowerBound90Value">0.0</span>, <span id="upperBound90Value">1.0</span>]</li>
+            <li>75% : [<span id="lowerBound75Value">0.0</span>, <span id="upperBound75Value">1.0</span>]</li>
+            <li>60% : [<span id="lowerBound60Value">0.0</span>, <span id="upperBound60Value">1.0</span>]</li>
+            <li>50% : [<span id="lowerBound50Value">0.0</span>, <span id="upperBound50Value">1.0</span>]</li>
+          </ul>
+          </li>
         </ul>
+
         
         <div class="info-box">
           <h2>Distribution Shape</h2>
-          <p>[DIST_SHAPE_DESCRIPTION]}</p>
+          <p>[DIST_SHAPE_DESCRIPTION]</p>
           <p><strong>Interpretation:</strong> [DIST_SHAPE_INTERPRETATION]</p>
         </div>
       </div>
     </div>
     
-    <div class="summary-box">
-      <h2>Chronulus Prediction Summary</h2>
-      <div>[CHRONULUS_PREDICTION_SUMMARY]</div>
-    </div>
+
     
     <div class="expert-opinions">
       <h2>Expert Opinions</h2>
@@ -335,20 +352,7 @@
       // Add event listeners
       document.getElementById('updateButton').addEventListener('click', updateDistribution);
       document.getElementById('regenerateButton').addEventListener('click', regenerateSamples);
-      
-      // Setup expert opinion expansion
-      document.getElementById('expand-experts').addEventListener('click', function() {
-        const moreExperts = document.getElementById('more-experts');
-        const expandButton = document.getElementById('expand-experts');
-        
-        if (moreExperts.style.display === 'none') {
-          moreExperts.style.display = 'block';
-          expandButton.textContent = '- Hide additional expert opinions';
-        } else {
-          moreExperts.style.display = 'none';
-          expandButton.textContent = '+ Add more expert opinions';
-        }
-      });
+
       
       // Setup preset buttons
       const presetButtons = document.querySelectorAll('.preset-btn');
@@ -415,12 +419,31 @@
       updateSampleStats(sampleStats, mean, stdDev, sampleSize);
       
       // Calculate confidence intervals
-      const [lowerBound, upperBound] = calculateConfidenceInterval(alpha, beta);
-      document.getElementById('lowerBoundValue').textContent = lowerBound.toFixed(4);
-      document.getElementById('upperBoundValue').textContent = upperBound.toFixed(4);
+      const [lowerBound95, upperBound95] = calculateBetaConfidenceInterval(alpha, beta, .95);
+      const [lowerBound90, upperBound90] = calculateBetaConfidenceInterval(alpha, beta, .90);
+      const [lowerBound75, upperBound75] =  calculateBetaConfidenceInterval(alpha, beta, .75);
+      const [lowerBound60, upperBound60] =  calculateBetaConfidenceInterval(alpha, beta, .60);
+      const [lowerBound50, upperBound50] =  calculateBetaConfidenceInterval(alpha, beta, .50);
+
+      document.getElementById('lowerBound95Value').textContent = lowerBound95.toFixed(4);
+      document.getElementById('upperBound95Value').textContent = upperBound95.toFixed(4);
+
+      document.getElementById('lowerBound90Value').textContent = lowerBound90.toFixed(4);
+      document.getElementById('upperBound90Value').textContent = upperBound90.toFixed(4);
+
+      document.getElementById('lowerBound75Value').textContent = lowerBound75.toFixed(4);
+      document.getElementById('upperBound75Value').textContent = upperBound75.toFixed(4);
+
+      document.getElementById('lowerBound60Value').textContent = lowerBound60.toFixed(4);
+      document.getElementById('upperBound60Value').textContent = upperBound60.toFixed(4);
+
+      document.getElementById('lowerBound50Value').textContent = lowerBound50.toFixed(4);
+      document.getElementById('upperBound50Value').textContent = upperBound50.toFixed(4);
+
+
       
       // Update shape description
-      updateShapeDescription(alpha, beta);
+      //updateShapeDescription(alpha, beta);
     }
     
     function regenerateSamples() {
@@ -673,33 +696,140 @@
       document.getElementById('stdDevDiffValue').textContent = stdDevDiffPct.toFixed(2);
     }
     
-    function calculateConfidenceInterval(alpha, beta) {
-      // This is a simplified approximation
-      // In practice, you'd use a proper statistical package
-      // We're using a rough method based on the beta distribution properties
-      
-      // For a 95% confidence interval, we want the 2.5th and 97.5th percentiles
-      // This is a very simplified approximation
-      const mean = alpha / (alpha + beta);
-      const variance = (alpha * beta) / ((alpha + beta) ** 2 * (alpha + beta + 1));
-      const stdDev = Math.sqrt(variance);
-      
-      // Using a normal approximation (which is reasonable for moderately large alpha and beta)
-      const z = 1.96; // 95% confidence
-      let lowerBound = mean - z * stdDev;
-      let upperBound = mean + z * stdDev;
-      
-      // Clamp to [0,1]
-      lowerBound = Math.max(0, lowerBound);
-      upperBound = Math.min(1, upperBound);
-      
+    /**
+     * Calculates an accurate confidence interval for a beta distribution
+     *
+     * @param {number} alpha - Alpha parameter of the beta distribution (should be positive)
+     * @param {number} beta - Beta parameter of the beta distribution (should be positive)
+     * @param {number} confidenceLevel - Desired confidence level (between 0 and 1, e.g., 0.95 for 95%)
+     * @returns {Array} - [lowerBound, upperBound] of the confidence interval
+     */
+    function calculateBetaConfidenceInterval(alpha, beta, confidenceLevel = 0.95) {
+      // Input validation
+      if (alpha <= 0 || beta <= 0) {
+        throw new Error("Alpha and beta parameters must be positive");
+      }
+
+      if (confidenceLevel <= 0 || confidenceLevel >= 1) {
+        throw new Error("Confidence level must be between 0 and 1 exclusive");
+      }
+
+      // Calculate the lower and upper percentiles based on the confidence level
+      const tailProbability = (1 - confidenceLevel) / 2;
+      const lowerPercentile = tailProbability;
+      const upperPercentile = 1 - tailProbability;
+
+      // Calculate the lower bound using the inverse regularized incomplete beta function
+      const lowerBound = jStat.beta.inv(lowerPercentile, alpha, beta);
+
+      // Calculate the upper bound using the inverse regularized incomplete beta function
+      const upperBound = jStat.beta.inv(upperPercentile, alpha, beta);
+
       return [lowerBound, upperBound];
+    }
+
+    /**
+     * This function requires the jStat library to calculate the inverse of the beta CDF.
+     * If you don't have access to jStat, here's a polyfill implementation of the key functions needed.
+     * Note: This is a simplified implementation and may not be as accurate as jStat for extreme values.
+     */
+    if (typeof jStat === 'undefined') {
+      // Create a minimal jStat-like object with just what we need
+      const jStat = {
+        beta: {
+          // Inverse of the regularized incomplete beta function (quantile function)
+          inv: function(p, alpha, beta) {
+            if (p <= 0) return 0;
+            if (p >= 1) return 1;
+
+            // Use binary search to find the value x where beta.cdf(x, alpha, beta) = p
+            let lower = 0;
+            let upper = 1;
+            let x = 0.5;
+            let iteration = 0;
+            const maxIterations = 100;
+            const tolerance = 1e-10;
+
+            while (iteration < maxIterations) {
+              // Calculate the CDF at the current guess
+              const cdf = this.cdf(x, alpha, beta);
+
+              // Check if we're close enough
+              if (Math.abs(cdf - p) < tolerance) {
+                break;
+              }
+
+              // Adjust our search interval
+              if (cdf < p) {
+                lower = x;
+              } else {
+                upper = x;
+              }
+
+              // New guess is midpoint of interval
+              x = (lower + upper) / 2;
+              iteration++;
+            }
+
+            return x;
+          },
+
+          // Regularized incomplete beta function (CDF of beta distribution)
+          cdf: function(x, alpha, beta) {
+            if (x <= 0) return 0;
+            if (x >= 1) return 1;
+
+            // Use numerical integration for the incomplete beta function
+            // This is a simplified approximation using the trapezoidal rule
+            const n = 1000; // Number of intervals
+            const dx = x / n;
+            let sum = 0;
+
+            for (let i = 0; i <= n; i++) {
+              const t = i * dx;
+              const weight = (i === 0 || i === n) ? 0.5 : 1;
+              sum += weight * Math.pow(t, alpha - 1) * Math.pow(1 - t, beta - 1);
+            }
+
+            sum *= dx;
+
+            // Normalize by the beta function value
+            return sum / this.betaFn(alpha, beta);
+          },
+
+          // Beta function B(α,β)
+          betaFn: function(alpha, beta) {
+            return this.gammaFn(alpha) * this.gammaFn(beta) / this.gammaFn(alpha + beta);
+          },
+
+          // Approximation of the gamma function for positive values
+          gammaFn: function(z) {
+            // Lanczos approximation for the gamma function
+            if (z < 0.5) {
+              return Math.PI / (Math.sin(Math.PI * z) * this.gammaFn(1 - z));
+            }
+
+            z -= 1;
+            const p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+                       771.32342877765313, -176.61502916214059, 12.507343278686905,
+                       -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+
+            let x = p[0];
+            for (let i = 1; i < p.length; i++) {
+              x += p[i] / (z + i);
+            }
+
+            const t = z + p.length - 1.5;
+            return Math.sqrt(2 * Math.PI) * Math.pow(t, z + 0.5) * Math.exp(-t) * x;
+          }
+        }
+      };
     }
     
     function updateShapeDescription(alpha, beta) {
       let shape;
       let interpretation;
-      
+
       if (alpha < 1 && beta < 1) {
         shape = "U-shaped";
         interpretation = "high uncertainty with probability clustered at extremes";
@@ -722,7 +852,7 @@
         shape = "Skewed right";
         interpretation = "stronger confidence in higher probabilities";
       }
-      
+
       document.getElementById('shapeDescription').textContent = shape;
       document.getElementById('shapeInterpretation').textContent = interpretation;
     }
