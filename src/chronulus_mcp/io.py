@@ -120,8 +120,8 @@ async def save_prediction_analysis_html(
 
     expert_opinion_list = []
     for i, p in enumerate(prediction_set):
-        pos_text = p.pair.positive.text
-        neg_text = p.pair.negative.text
+        pos_text = p.opinion_set.positive.text
+        neg_text = p.opinion_set.negative.text
         pos = f"""
         <div class="expert-opinion positive-case">
             <h3>Expert {i+1} - Positive Case</h3>
