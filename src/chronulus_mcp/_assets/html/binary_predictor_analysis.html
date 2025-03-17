@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[TITLE_OF_ANALYSIS]</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js" integrity="sha512-UK8MjH09aePxFAd8OwI5P4oP462OBBNGVh3OtnuHjybd0T3ArUbAseIuHpS1XfinmMXcCZG5barC+7SNPjuQtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .chart-container {
+      position: relative;
+      height: 400px;
+      margin-bottom: 20px;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      flex-wrap: wrap;
+    }
+    .control-group {
+      margin-right: 20px;
+      margin-bottom: 10px;
+    }
+    .control-group:last-child {
+      margin-right: 0;
+    }
+    .control-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    .control-group input {
+      width: 120px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #4a6cf7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #3755d8;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #444;
+      margin-top: 25px;
+      margin-bottom: 15px;
+    }
+    h3 {
+      color: #555;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+    .stats-container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .stats-box {
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 15px;
+      flex: 1;
+      min-width: 300px;
+      margin-right: 10px;
+    }
+    .stats-box:last-child {
+      margin-right: 0;
+    }
+    .info-box {
+      background-color: #e6f3ff;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .sample-stats {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .summary-box {
+      background-color: #fff8e6;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .expert-opinions {
+      background-color: #f0f7ff;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .expert-opinion {
+      background-color: #fff;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 15px;
+      border-left: 4px solid #4a6cf7;
+    }
+    .positive-case {
+      border-left: 4px solid #28a745;
+    }
+    .negative-case {
+      border-left: 4px solid #dc3545;
+    }
+    .expand-btn {
+      margin-top: 10px;
+      color: #4a6cf7;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      display: block;
+      text-align: left;
+    }
+    .expand-btn:hover {
+      text-decoration: underline;
+      background: none;
+    }
+    .histogram-container {
+      position: relative;
+      height: 300px;
+      margin-top: 30px;
+    }
+    ul {
+      padding-left: 20px;
+      margin-top: 10px;
+    }
+    .footer {
+      text-align: center;
+      color: #777;
+      font-size: 14px;
+      margin-top: 30px;
+    }
+    .preset-box {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+    }
+    .preset-btn {
+      padding: 5px 10px;
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      margin-right: 5px;
+      cursor: pointer;
+      margin-top: 0;
+      font-size: 12px;
+    }
+    .preset-btn:hover {
+      background-color: #5a6268;
+    }
+    .prediction-highlight {
+      font-weight: bold;
+      color: #28a745;
+    }
+    pre {
+      white-space: pre-wrap;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      margin: 0;
+      padding: 0;
+    }
+    @media (max-width: 768px) {
+      .stats-container {
+        flex-direction: column;
+      }
+      .stats-box {
+        margin-right: 0;
+      }
+      .control-group {
+        margin-right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>[TITLE_OF_ANALYSIS]</h1>
+    
+    <div class="controls">
+      <div class="control-group">
+        <label for="alpha">Alpha (α):</label>
+        <input type="number" id="alpha" min="0.1" step="0.1" value="1.1">
+      </div>
+      
+      <div class="control-group">
+        <label for="beta">Beta (β):</label>
+        <input type="number" id="beta" min="0.1" step="0.1" value="1.1">
+      </div>
+      
+      <div class="control-group">
+        <label for="sampleSize">Sample Size:</label>
+        <input type="number" id="sampleSize" min="100" max="10000" step="100" value="1000">
+      </div>
+      
+      <div class="control-group">
+        <button id="updateButton">Update Distribution</button>
+        <button id="regenerateButton">Regenerate Samples</button>
+      </div>
+    </div>
+    
+    <div class="preset-box">
+      <strong>Presets:</strong>
+      <button class="preset-btn" data-alpha="[ALPHA]" data-beta="[BETA]">[PLOT_LABEL]</button>
+      <button class="preset-btn" data-alpha="1" data-beta="1">Uniform (α=1, β=1)</button>
+      <button class="preset-btn" data-alpha="5" data-beta="5">Symmetric (α=5, β=5)</button>
+      <button class="preset-btn" data-alpha="2" data-beta="5">Skewed Left (α=2, β=5)</button>
+      <button class="preset-btn" data-alpha="5" data-beta="2">Skewed Right (α=5, β=2)</button>
+    </div>
+    
+    <div class="chart-container">
+      <canvas id="betaChart"></canvas>
+    </div>
+    
+    <div class="histogram-container">
+      <canvas id="histogramChart"></canvas>
+    </div>
+    
+    <div class="stats-container">
+
+      <div class="summary-box">
+        <h2>Chronulus Prediction Summary</h2>
+        <div>[CHRONULUS_PREDICTION_SUMMARY]</div>
+      </div>
+
+      <div class="stats-box">
+        <h2>Theoretical Properties</h2>
+        <ul>
+          <li>Parameters: α = <span id="alphaValue"></span>, β = <span id="betaValue"></span></li>
+          <li>Mean = <span id="meanValue"></span></li>
+          <li>Standard Deviation = <span id="stdDevValue"></span></li>
+          <li>Variance = <span id="varianceValue"></span></li>
+          <li>Mode = <span id="modeValue"></span></li>
+        </ul>
+        
+        <div class="sample-stats">
+          <h2>Empirical Properties</h2>
+          <ul>
+            <li>Sample Size = <span id="sampleSizeValue">1000</span></li>
+            <li>Sample Mean = <span id="sampleMeanValue">---</span></li>
+            <li>Sample Std Dev = <span id="sampleStdDevValue">---</span></li>
+            <li>Difference from Theoretical:
+              <ul>
+                <li>Mean: <span id="meanDiffValue">---</span>%</li>
+                <li>Std Dev: <span id="stdDevDiffValue">---</span>%</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+
+      
+      <div class="stats-box">
+
+        <h2>Confidence Intervals</h2>
+        <ul>
+          <li>Consensus Prediction: <span id="consensusValue">[MEAN]</span>%</li>
+          <li>
+            Confidence Intervals:
+            <ul>
+            <li>95% : [<span id="lowerBound95Value">0.0</span>, <span id="upperBound95Value">1.0</span>]</li>
+            <li>90% : [<span id="lowerBound90Value">0.0</span>, <span id="upperBound90Value">1.0</span>]</li>
+            <li>75% : [<span id="lowerBound75Value">0.0</span>, <span id="upperBound75Value">1.0</span>]</li>
+            <li>60% : [<span id="lowerBound60Value">0.0</span>, <span id="upperBound60Value">1.0</span>]</li>
+            <li>50% : [<span id="lowerBound50Value">0.0</span>, <span id="upperBound50Value">1.0</span>]</li>
+          </ul>
+          </li>
+        </ul>
+
+        
+        <div class="info-box">
+          <h2>Distribution Shape</h2>
+          <p>[DIST_SHAPE_DESCRIPTION]</p>
+          <p><strong>Interpretation:</strong> [DIST_SHAPE_INTERPRETATION]</p>
+        </div>
+      </div>
+    </div>
+    
+
+    
+    <div class="expert-opinions">
+      <h2>Expert Opinions</h2>
+      <p>Below are the detailed analyses from the Chronulus experts. Each expert evaluated the question from both a positive case (probability the event would occur) and a negative case (probability the event would not occur).</p>
+
+      [EXPERT_OPINIONS]
+
+    </div>
+    
+    <div class="footer">
+      Created using Chronulus AI
+      <br>
+      Generated on [DATE]
+    </div>
+  </div>
+
+  <script>
+    // Initialize charts and values
+    let betaChart, histogramChart;
+    let samples = [];
+    
+    // Default parameters from the Chronulus prediction
+    const defaultAlpha = [ALPHA];
+    const defaultBeta = [BETA];
+    const defaultSampleSize = 1000;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set initial values
+      document.getElementById('alpha').value = defaultAlpha;
+      document.getElementById('beta').value = defaultBeta;
+      document.getElementById('sampleSize').value = defaultSampleSize;
+      
+      // Generate the initial distribution
+      updateDistribution();
+      
+      // Add event listeners
+      document.getElementById('updateButton').addEventListener('click', updateDistribution);
+      document.getElementById('regenerateButton').addEventListener('click', regenerateSamples);
+
+      
+      // Setup preset buttons
+      const presetButtons = document.querySelectorAll('.preset-btn');
+      presetButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const alpha = parseFloat(this.getAttribute('data-alpha'));
+          const beta = parseFloat(this.getAttribute('data-beta'));
+          
+          document.getElementById('alpha').value = alpha;
+          document.getElementById('beta').value = beta;
+          
+          updateDistribution();
+        });
+      });
+    });
+    
+    function updateDistribution() {
+      // Get parameters from inputs
+      const alpha = parseFloat(document.getElementById('alpha').value);
+      const beta = parseFloat(document.getElementById('beta').value);
+      const sampleSize = parseInt(document.getElementById('sampleSize').value);
+      
+      if (isNaN(alpha) || isNaN(beta) || alpha <= 0 || beta <= 0) {
+        alert('Alpha and Beta must be positive numbers');
+        return;
+      }
+      
+      // Update displayed values
+      document.getElementById('alphaValue').textContent = alpha.toFixed(4);
+      document.getElementById('betaValue').textContent = beta.toFixed(4);
+      
+      // Calculate theoretical properties
+      const mean = alpha / (alpha + beta);
+      const variance = (alpha * beta) / ((alpha + beta) ** 2 * (alpha + beta + 1));
+      const stdDev = Math.sqrt(variance);
+      let mode;
+      if (alpha > 1 && beta > 1) {
+        mode = (alpha - 1) / (alpha + beta - 2);
+      } else if (alpha < 1 && beta >= 1) {
+        mode = 0;
+      } else if (alpha >= 1 && beta < 1) {
+        mode = 1;
+      } else {
+        mode = "Not unique";
+      }
+      
+      // Update theoretical stats
+      document.getElementById('meanValue').textContent = mean.toFixed(4);
+      document.getElementById('stdDevValue').textContent = stdDev.toFixed(4);
+      document.getElementById('varianceValue').textContent = variance.toFixed(6);
+      document.getElementById('modeValue').textContent = typeof mode === 'number' ? mode.toFixed(4) : mode;
+      
+      // Generate PDF and update chart
+      const pdfData = generateBetaPDF(alpha, beta);
+      updatePDFChart(pdfData, alpha, beta);
+      
+      // Generate samples
+      samples = generateBetaSamples(alpha, beta, sampleSize);
+      const histogramData = createHistogram(samples);
+      updateHistogramChart(histogramData, alpha, beta);
+      
+      // Calculate sample statistics
+      const sampleStats = calculateSampleStats(samples);
+      updateSampleStats(sampleStats, mean, stdDev, sampleSize);
+      
+      // Calculate confidence intervals
+      const [lowerBound95, upperBound95] = calculateBetaConfidenceInterval(alpha, beta, .95);
+      const [lowerBound90, upperBound90] = calculateBetaConfidenceInterval(alpha, beta, .90);
+      const [lowerBound75, upperBound75] =  calculateBetaConfidenceInterval(alpha, beta, .75);
+      const [lowerBound60, upperBound60] =  calculateBetaConfidenceInterval(alpha, beta, .60);
+      const [lowerBound50, upperBound50] =  calculateBetaConfidenceInterval(alpha, beta, .50);
+
+      document.getElementById('lowerBound95Value').textContent = lowerBound95.toFixed(4);
+      document.getElementById('upperBound95Value').textContent = upperBound95.toFixed(4);
+
+      document.getElementById('lowerBound90Value').textContent = lowerBound90.toFixed(4);
+      document.getElementById('upperBound90Value').textContent = upperBound90.toFixed(4);
+
+      document.getElementById('lowerBound75Value').textContent = lowerBound75.toFixed(4);
+      document.getElementById('upperBound75Value').textContent = upperBound75.toFixed(4);
+
+      document.getElementById('lowerBound60Value').textContent = lowerBound60.toFixed(4);
+      document.getElementById('upperBound60Value').textContent = upperBound60.toFixed(4);
+
+      document.getElementById('lowerBound50Value').textContent = lowerBound50.toFixed(4);
+      document.getElementById('upperBound50Value').textContent = upperBound50.toFixed(4);
+
+
+      
+      // Update shape description
+      //updateShapeDescription(alpha, beta);
+    }
+    
+    function regenerateSamples() {
+      const alpha = parseFloat(document.getElementById('alpha').value);
+      const beta = parseFloat(document.getElementById('beta').value);
+      const sampleSize = parseInt(document.getElementById('sampleSize').value);
+      
+      samples = generateBetaSamples(alpha, beta, sampleSize);
+      const histogramData = createHistogram(samples);
+      updateHistogramChart(histogramData, alpha, beta);
+      
+      // Update sample statistics
+      const mean = alpha / (alpha + beta);
+      const variance = (alpha * beta) / ((alpha + beta) ** 2 * (alpha + beta + 1));
+      const stdDev = Math.sqrt(variance);
+      const sampleStats = calculateSampleStats(samples);
+      updateSampleStats(sampleStats, mean, stdDev, sampleSize);
+    }
+    
+    function generateBetaPDF(alpha, beta) {
+      const points = [];
+      
+      // Beta function approximation
+      function logBeta(a, b) {
+        return Math.log(Math.pow(a, a-0.5) * Math.pow(b, b-0.5) / Math.pow(a+b, a+b-0.5)) - 0.5 * Math.log(2 * Math.PI);
+      }
+      
+      const logBetaVal = logBeta(alpha, beta);
+      
+      for (let x = 0.01; x <= 0.99; x += 0.01) {
+        const density = Math.exp((alpha-1) * Math.log(x) + (beta-1) * Math.log(1-x) - logBetaVal);
+        points.push({
+          x: x,
+          y: density
+        });
+      }
+      
+      return points;
+    }
+    
+    function updatePDFChart(data, alpha, beta) {
+      const ctx = document.getElementById('betaChart').getContext('2d');
+      
+      // Destroy previous chart if it exists
+      if (betaChart) {
+        betaChart.destroy();
+      }
+      
+      betaChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.map(point => (point.x * 100).toFixed(0) + '%'),
+          datasets: [{
+            label: 'Probability Density',
+            data: data.map(point => point.y),
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.4,
+            fill: false,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: `Theoretical Beta Distribution (α=${alpha.toFixed(4)}, β=${beta.toFixed(4)})`,
+              font: {
+                size: 16
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `Density: ${context.parsed.y.toFixed(3)}`;
+                },
+                title: function(context) {
+                  return `Probability: ${context[0].label}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Probability'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Density'
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    function generateBetaSamples(alpha, beta, sampleSize) {
+      // This is a simplified approach using the method based on gamma distributions
+      const samples = [];
+      
+      for (let i = 0; i < sampleSize; i++) {
+        // Use the fact that if X ~ Gamma(a) and Y ~ Gamma(b), then X/(X+Y) ~ Beta(a,b)
+        let x = 0;
+        for (let j = 0; j < Math.floor(alpha); j++) {
+          x -= Math.log(Math.random());
+        }
+        // Handle the fractional part
+        if (alpha % 1 > 0) {
+          x -= Math.log(Math.random()) * (alpha % 1);
+        }
+
+        let y = 0;
+        for (let j = 0; j < Math.floor(beta); j++) {
+          y -= Math.log(Math.random());
+        }
+        // Handle the fractional part
+        if (beta % 1 > 0) {
+          y -= Math.log(Math.random()) * (beta % 1);
+        }
+
+        const betaSample = x / (x + y);
+        samples.push(betaSample);
+      }
+      
+      return samples;
+    }
+    
+    function createHistogram(samples, bins = 20) {
+      const min = 0;
+      const max = 1;
+      const binWidth = (max - min) / bins;
+      
+      // Initialize bins
+      const histogram = Array(bins).fill(0).map((_, i) => ({
+        binStart: min + i * binWidth,
+        binEnd: min + (i + 1) * binWidth,
+        count: 0
+      }));
+      
+      // Count samples in each bin
+      samples.forEach(sample => {
+        if (sample >= min && sample < max) {
+          const binIndex = Math.min(Math.floor((sample - min) / binWidth), bins - 1);
+          histogram[binIndex].count += 1;
+        }
+      });
+      
+      // Convert counts to density for comparison with PDF
+      const totalSamples = samples.length;
+      histogram.forEach(bin => {
+        bin.density = totalSamples > 0 ? bin.count / (totalSamples * binWidth) : 0;
+      });
+      
+      return histogram;
+    }
+    
+    function updateHistogramChart(data, alpha, beta) {
+      const ctx = document.getElementById('histogramChart').getContext('2d');
+      
+      // Destroy previous chart if it exists
+      if (histogramChart) {
+        histogramChart.destroy();
+      }
+      
+      histogramChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map(bin => `${(bin.binStart * 100).toFixed(0)}%-${(bin.binEnd * 100).toFixed(0)}%`),
+          datasets: [{
+            label: 'Empirical Density',
+            data: data.map(bin => bin.density),
+            backgroundColor: 'rgba(153, 102, 255, 0.5)',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: `Empirical Distribution (${document.getElementById('sampleSize').value} samples)`,
+              font: {
+                size: 16
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const binIndex = context.dataIndex;
+                  const bin = data[binIndex];
+                  return [
+                    `Density: ${bin.density.toFixed(3)}`,
+                    `Count: ${bin.count}`,
+                    `Range: ${(bin.binStart * 100).toFixed(0)}%-${(bin.binEnd * 100).toFixed(0)}%`
+                  ];
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Probability Range'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Density'
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    function calculateSampleStats(samples) {
+      if (samples.length === 0) return { mean: 0, stdDev: 0 };
+      
+      const mean = samples.reduce((sum, val) => sum + val, 0) / samples.length;
+      
+      const sumSquaredDiff = samples.reduce((sum, val) => {
+        const diff = val - mean;
+        return sum + diff * diff;
+      }, 0);
+      
+      const variance = sumSquaredDiff / samples.length;
+      const stdDev = Math.sqrt(variance);
+      
+      return { mean, stdDev };
+    }
+    
+    function updateSampleStats(sampleStats, theoreticalMean, theoreticalStdDev, sampleSize) {
+      document.getElementById('sampleSizeValue').textContent = sampleSize;
+      document.getElementById('sampleMeanValue').textContent = sampleStats.mean.toFixed(4);
+      document.getElementById('sampleStdDevValue').textContent = sampleStats.stdDev.toFixed(4);
+      
+      const meanDiffPct = (Math.abs(sampleStats.mean - theoreticalMean) / theoreticalMean * 100);
+      const stdDevDiffPct = (Math.abs(sampleStats.stdDev - theoreticalStdDev) / theoreticalStdDev * 100);
+      
+      document.getElementById('meanDiffValue').textContent = meanDiffPct.toFixed(2);
+      document.getElementById('stdDevDiffValue').textContent = stdDevDiffPct.toFixed(2);
+    }
+    
+    /**
+     * Calculates an accurate confidence interval for a beta distribution
+     *
+     * @param {number} alpha - Alpha parameter of the beta distribution (should be positive)
+     * @param {number} beta - Beta parameter of the beta distribution (should be positive)
+     * @param {number} confidenceLevel - Desired confidence level (between 0 and 1, e.g., 0.95 for 95%)
+     * @returns {Array} - [lowerBound, upperBound] of the confidence interval
+     */
+    function calculateBetaConfidenceInterval(alpha, beta, confidenceLevel = 0.95) {
+      // Input validation
+      if (alpha <= 0 || beta <= 0) {
+        throw new Error("Alpha and beta parameters must be positive");
+      }
+
+      if (confidenceLevel <= 0 || confidenceLevel >= 1) {
+        throw new Error("Confidence level must be between 0 and 1 exclusive");
+      }
+
+      // Calculate the lower and upper percentiles based on the confidence level
+      const tailProbability = (1 - confidenceLevel) / 2;
+      const lowerPercentile = tailProbability;
+      const upperPercentile = 1 - tailProbability;
+
+      // Calculate the lower bound using the inverse regularized incomplete beta function
+      const lowerBound = jStat.beta.inv(lowerPercentile, alpha, beta);
+
+      // Calculate the upper bound using the inverse regularized incomplete beta function
+      const upperBound = jStat.beta.inv(upperPercentile, alpha, beta);
+
+      return [lowerBound, upperBound];
+    }
+
+    /**
+     * This function requires the jStat library to calculate the inverse of the beta CDF.
+     * If you don't have access to jStat, here's a polyfill implementation of the key functions needed.
+     * Note: This is a simplified implementation and may not be as accurate as jStat for extreme values.
+     */
+    if (typeof jStat === 'undefined') {
+      // Create a minimal jStat-like object with just what we need
+      const jStat = {
+        beta: {
+          // Inverse of the regularized incomplete beta function (quantile function)
+          inv: function(p, alpha, beta) {
+            if (p <= 0) return 0;
+            if (p >= 1) return 1;
+
+            // Use binary search to find the value x where beta.cdf(x, alpha, beta) = p
+            let lower = 0;
+            let upper = 1;
+            let x = 0.5;
+            let iteration = 0;
+            const maxIterations = 100;
+            const tolerance = 1e-10;
+
+            while (iteration < maxIterations) {
+              // Calculate the CDF at the current guess
+              const cdf = this.cdf(x, alpha, beta);
+
+              // Check if we're close enough
+              if (Math.abs(cdf - p) < tolerance) {
+                break;
+              }
+
+              // Adjust our search interval
+              if (cdf < p) {
+                lower = x;
+              } else {
+                upper = x;
+              }
+
+              // New guess is midpoint of interval
+              x = (lower + upper) / 2;
+              iteration++;
+            }
+
+            return x;
+          },
+
+          // Regularized incomplete beta function (CDF of beta distribution)
+          cdf: function(x, alpha, beta) {
+            if (x <= 0) return 0;
+            if (x >= 1) return 1;
+
+            // Use numerical integration for the incomplete beta function
+            // This is a simplified approximation using the trapezoidal rule
+            const n = 1000; // Number of intervals
+            const dx = x / n;
+            let sum = 0;
+
+            for (let i = 0; i <= n; i++) {
+              const t = i * dx;
+              const weight = (i === 0 || i === n) ? 0.5 : 1;
+              sum += weight * Math.pow(t, alpha - 1) * Math.pow(1 - t, beta - 1);
+            }
+
+            sum *= dx;
+
+            // Normalize by the beta function value
+            return sum / this.betaFn(alpha, beta);
+          },
+
+          // Beta function B(α,β)
+          betaFn: function(alpha, beta) {
+            return this.gammaFn(alpha) * this.gammaFn(beta) / this.gammaFn(alpha + beta);
+          },
+
+          // Approximation of the gamma function for positive values
+          gammaFn: function(z) {
+            // Lanczos approximation for the gamma function
+            if (z < 0.5) {
+              return Math.PI / (Math.sin(Math.PI * z) * this.gammaFn(1 - z));
+            }
+
+            z -= 1;
+            const p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+                       771.32342877765313, -176.61502916214059, 12.507343278686905,
+                       -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+
+            let x = p[0];
+            for (let i = 1; i < p.length; i++) {
+              x += p[i] / (z + i);
+            }
+
+            const t = z + p.length - 1.5;
+            return Math.sqrt(2 * Math.PI) * Math.pow(t, z + 0.5) * Math.exp(-t) * x;
+          }
+        }
+      };
+    }
+    
+    function updateShapeDescription(alpha, beta) {
+      let shape;
+      let interpretation;
+
+      if (alpha < 1 && beta < 1) {
+        shape = "U-shaped";
+        interpretation = "high uncertainty with probability clustered at extremes";
+      } else if (alpha <= 1 && beta > 1) {
+        shape = "J-shaped, decreasing";
+        interpretation = "higher confidence in lower probabilities";
+      } else if (alpha > 1 && beta <= 1) {
+        shape = "J-shaped, increasing";
+        interpretation = "higher confidence in higher probabilities";
+      } else if (alpha === 1 && beta === 1) {
+        shape = "Uniform";
+        interpretation = "equal likelihood across all probabilities";
+      } else if (Math.abs(alpha - beta) < 0.1) {
+        shape = "Symmetric, bell-shaped";
+        interpretation = "balanced uncertainty around the mean";
+      } else if (alpha < beta) {
+        shape = "Skewed left";
+        interpretation = "stronger confidence in lower probabilities";
+      } else {
+        shape = "Skewed right";
+        interpretation = "stronger confidence in higher probabilities";
+      }
+
+      document.getElementById('shapeDescription').textContent = shape;
+      document.getElementById('shapeInterpretation').textContent = interpretation;
+    }
+  </script>
+</body>
+</html>
