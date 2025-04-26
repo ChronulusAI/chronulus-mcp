@@ -4,8 +4,11 @@
     <h3 align="center">Chat with Chronulus AI Forecasting & Prediction Agents in Claude</h3>
 </div>
 
+A dynamic MCP server that interfaces with Chronulus AI for advanced forecasting and prediction capabilities.
 
-
+<a href="https://glama.ai/mcp/servers/@ChronulusAI/chronulus-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@ChronulusAI/chronulus-mcp/badge" alt="Chronulus Server MCP server" />
+</a>
 
 ### Quickstart: Claude for Desktop
 
