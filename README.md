@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/chronulusai-chronulus-mcp-badge.png)](https://mseep.ai/app/chronulusai-chronulus-mcp)
+
 <div align="center">
 <img width="150px" src="https://www.chronulus.com/brand-assets/chronulus-logo-blue-on-alpha-square.png" alt="Chronulus AI">
     <h1 align="center">MCP Server for Chronulus</h1>
