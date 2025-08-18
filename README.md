@@ -4,6 +4,8 @@
     <h3 align="center">Chat with Chronulus AI Forecasting & Prediction Agents in Claude</h3>
 </div>
 
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/ChronulusAI/chronulus-mcp)](https://archestra.ai/mcp-catalog/chronulusai__chronulus-mcp)
+
 
 
 
