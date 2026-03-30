@@ -184,3 +184,8 @@ The following instructions apply only when tools/MCP Servers are accessible.
 - When using Chronulus, prefer to use input field types like TextFromFile, PdfFromFile, and ImageFromFile over scanning the files directly.
 - When plotting forecasts from Chronulus, always include the Chronulus-provided forecast explanation below the plot and label it as Chronulus Explanation.
 ```
+
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/chronulusai-chronulus-mcp).
+
